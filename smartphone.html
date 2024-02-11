@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture de selfie</title>
+    <style>
+        #videoContainer {
+            position: relative;
+            width: 100%; /* Largeur à 100% pour remplir l'écran */
+            padding-top: 56.25%; /* Aspect ratio 16:9 pour la vidéo */
+        }
+        #overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30%; /* Largeur de l'ellipse relative */
+            padding-top: 40%; /* Hauteur de l'ellipse relative */
+            border-radius: 50%;
+            border: 2px solid white;
+            pointer-events: none;
+            z-index: 1;
+        }
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        #captureButton {
+            display: block;
+            margin: 20px auto;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="videoContainer">
+        <video id="video" autoplay></video>
+        <div id="overlay"></div>
+    </div>
+    <button id="captureButton">Capturer</button>
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureButton = document.getElementById('captureButton');
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'accès à la webcam : ', error);
+            });
+
+        captureButton.addEventListener('click', () => {
+            capturePhoto();
+        });
+
+        function capturePhoto() {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/png');
+
+            // Télécharger l'image
+            const link = document.createElement('a');
+            link.href = imageData;
+            link.download = 'selfie.png'; // Nom du fichier à télécharger
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
